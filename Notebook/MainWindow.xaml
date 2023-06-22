@@ -8,21 +8,20 @@
         Title="MainWindow" Height="450" Width="800" MouseDown="Window_MouseDown">
     <Grid x:Name="appGrid" Focusable="True">
         <Grid.RowDefinitions>
-            <RowDefinition Height="*"></RowDefinition>
-            <RowDefinition Height="5*"></RowDefinition>
+            <RowDefinition MinHeight="70" MaxHeight="100"></RowDefinition>
+            <RowDefinition></RowDefinition>
         </Grid.RowDefinitions>
 
         <Grid Grid.Row="0">
             <StackPanel Orientation="Horizontal" Margin="10 0 0 0">
                 <TextBox Width="200" Height="30" VerticalContentAlignment="Center" 
-                         Padding="5 0 0 0" x:Name="titleInput"
+                         Padding="5 0 0 0" x:Name="titleTextBox"
                          GotFocus="TextBox_GotFocus" LostFocus="TextBox_LostFocus">
                     <TextBox.Template>
                         <ControlTemplate TargetType="TextBox">
                             <Border Background="{TemplateBinding Background}"
                                     BorderBrush="{TemplateBinding BorderBrush}"
-                                    BorderThickness="{TemplateBinding BorderThickness}"
-                                    x:Name="titleInputBorder">
+                                    BorderThickness="{TemplateBinding BorderThickness}">
                                 <ScrollViewer x:Name="PART_ContentHost" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"  SnapsToDevicePixels="True" />
                             </Border>
                             <ControlTemplate.Triggers>
@@ -35,14 +34,13 @@
                     </TextBox.Template>
                 </TextBox>
                 <TextBox Width="200" Height="30" VerticalContentAlignment="Center" 
-                         Margin="10 0 0 0" Padding="5 0 0 0" x:Name="descriptionInput" 
+                         Margin="10 0 0 0" Padding="5 0 0 0" x:Name="descriptionTextBox" 
                          GotFocus="TextBox_GotFocus" LostFocus="TextBox_LostFocus">
                     <TextBox.Template>
                         <ControlTemplate TargetType="TextBox">
                             <Border Background="{TemplateBinding Background}"
                                 BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}"
-                                x:Name="descriptionInputBorder">
+                                BorderThickness="{TemplateBinding BorderThickness}">
                                 <ScrollViewer x:Name="PART_ContentHost" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"  SnapsToDevicePixels="True" />
                             </Border>
                             <ControlTemplate.Triggers>
@@ -54,9 +52,17 @@
                         </ControlTemplate>
                     </TextBox.Template>
                 </TextBox>
-                <Button Width="100" Height="30" Content="Add" 
-                        Margin="10 0 0 0" Background="LightBlue" Click="Button_Click"></Button>
+                <Button Width="100" Height="30" Content="Add" BorderThickness="0"
+                        Margin="10 0 0 0" Background="#3F9870" Foreground="White"
+                        Click="Button_Click"></Button>
             </StackPanel>
+        </Grid>
+        <Grid Grid.Row="1" x:Name="toDoListGrid">
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <StackPanel Orientation="Vertical" x:Name="toDoListStackPanel">
+                
+                </StackPanel>
+            </ScrollViewer>
         </Grid>
     </Grid>
 </Window>
