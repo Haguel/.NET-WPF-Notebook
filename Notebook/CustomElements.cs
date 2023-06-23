@@ -9,7 +9,7 @@ using System.Windows.Media;
 
 namespace Notebook
 {
-    internal class CustomButtons
+    internal class CustomElements
     {
         ColorsConfig colorsConfig = new ColorsConfig();
 
@@ -29,14 +29,21 @@ namespace Notebook
             BorderThickness = new Thickness(0),
             Width = 75,
             Height = 25,
-        };    
+        };
+
+        private TextBox baseTextBox = new TextBox
+        {
+            BorderThickness = new Thickness(1),
+            MaxWidth = 500,
+            Padding = new Thickness(5, 0, 5, 0),
+        };
 
         public Button getSaveButton() 
         {
             return new Button
             {
                 Content = "Save",
-                Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString(colorsConfig.saveButtonBackground)),
+                Background = colorsConfig.saveButtonBackground,
                 Foreground = Brushes.White,
                 Margin = baseToolsButton.Margin,
                 Padding = baseToolsButton.Padding,
@@ -51,8 +58,8 @@ namespace Notebook
             return new Button
             {
                 Content = "Cancel",
-                Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString(colorsConfig.cancelButtonBackground)),
-                Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString(colorsConfig.cancelButtonForeground)),
+                Background = colorsConfig.cancelButtonBackground,
+                Foreground = colorsConfig.cancelButtonForeground,
                 Margin = baseToolsButton.Margin,
                 Padding = baseToolsButton.Padding,
                 BorderThickness = baseToolsButton.BorderThickness,
@@ -66,7 +73,7 @@ namespace Notebook
             return new Button
             {
                 Content = "Remove",
-                Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString(colorsConfig.removeButtonBackground)),
+                Background = colorsConfig.removeButtonBackground,
                 Foreground = Brushes.White,
                 Margin = baseButton.Margin,
                 Padding = baseButton.Padding,
@@ -81,13 +88,58 @@ namespace Notebook
             return new Button
             {
                 Content = "Edit",
-                Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString(colorsConfig.editButtonBackground)),
+                Background = colorsConfig.editButtonBackground,
                 Foreground = Brushes.White,
                 Margin = baseButton.Margin,
                 Padding = baseButton.Padding,
                 BorderThickness = baseButton.BorderThickness,
                 Width = baseButton.Width,
                 Height = baseButton.Height
+            };
+        }
+
+        public StackPanel getToDoStackPanel()
+        {
+            return new StackPanel
+            {
+                Orientation = Orientation.Vertical,
+                HorizontalAlignment = HorizontalAlignment.Left,
+                Margin = new Thickness(10, 0, 0, 10)
+            };
+        }
+
+        public TextBox getTitleTextBox(string text)
+        {
+            TextBox test = new TextBox
+            {
+                Text = text,
+                FontSize = 18,
+                Foreground = Brushes.Black,
+                Focusable = false,
+                BorderBrush = Brushes.Transparent,
+                BorderThickness = baseTextBox.BorderThickness,
+                Padding = baseTextBox.Padding,
+                TextWrapping = TextWrapping.Wrap,
+                MaxWidth = baseTextBox.MaxWidth,
+                Margin = new Thickness(-10, 0, 0, 5)
+            };
+
+            return test;
+        }
+
+        public TextBox getDescriptionTextBox(string text) 
+        {
+            return new TextBox
+            {
+                Text = text,
+                Foreground = Brushes.Black,
+                TextWrapping = TextWrapping.Wrap,
+                Focusable = false,
+                BorderBrush = Brushes.Transparent,
+                BorderThickness = baseTextBox.BorderThickness,
+                MaxWidth = baseTextBox.MaxWidth,
+                Padding = baseTextBox.Padding,
+                Margin = new Thickness(-10, 0, 0, 0)
             };
         }
     }

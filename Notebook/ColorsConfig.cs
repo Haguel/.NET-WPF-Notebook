@@ -9,13 +9,12 @@ namespace Notebook
 {
     internal class ColorsConfig
     {
-        public readonly SolidColorBrush test = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#ABADB3"));
-        public readonly string textBoxBorderDefaultBackground = "#ABADB3";
-        public readonly string textBoxBorderErrorBackground = "#EE4238";
-        public readonly string removeButtonBackground = "#ED5E68";
-        public readonly string editButtonBackground = "#3F8EBD";
-        public readonly string saveButtonBackground = "#25C077";
-        public readonly string cancelButtonBackground = "#8388A4";
-        public readonly string cancelButtonForeground = "#F5FDFF";
+        public readonly SolidColorBrush textBoxBorderDefaultBackground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#ABADB3"));
+        public readonly SolidColorBrush textBoxBorderErrorBackground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#EE4238"));
+        public readonly SolidColorBrush removeButtonBackground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#ED5E68"));
+        public readonly SolidColorBrush editButtonBackground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#3F8EBD"));
+        public readonly SolidColorBrush saveButtonBackground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#25C077"));
+        public readonly SolidColorBrush cancelButtonBackground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#8388A4"));
+        public readonly SolidColorBrush cancelButtonForeground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#F5FDFF"));
     }
 }

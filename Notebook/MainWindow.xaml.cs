@@ -23,7 +23,10 @@ namespace Notebook
         private string descriptionTextBoxPlaceholder = "Enter description";
 
         ColorsConfig colorsConfig = new ColorsConfig();
-        CustomButtons customButtons = new CustomButtons();
+        CustomElements customElements = new CustomElements();
+
+        private string titleState;
+        private string descriptionState;
 
         private enum ButtonsStackPanelOrder
         {
@@ -49,7 +52,7 @@ namespace Notebook
             descriptionTextBox.Text = descriptionTextBoxPlaceholder;
             descriptionTextBox.Tag = descriptionTextBoxPlaceholder;
 
-            titleTextBox.BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString(colorsConfig.textBoxBorderDefaultBackground));
+            titleTextBox.BorderBrush = colorsConfig.textBoxBorderDefaultBackground;
         }
 
         private bool isTextBoxEmpty(TextBox textBox) => textBox.Text.Trim() == "";
@@ -80,13 +83,13 @@ namespace Notebook
 
             if (isTextBoxEmpty(titleTextBox) || isPlaceholder(titleTextBox, titleTextBoxPlaceholder))
             {
-                titleTextBox.BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString(colorsConfig.textBoxBorderErrorBackground));
+                titleTextBox.BorderBrush = colorsConfig.textBoxBorderErrorBackground;
                 canBeAdded = false;
             }
 
             if (isTextBoxEmpty(descriptionTextBox) || isPlaceholder(descriptionTextBox, descriptionTextBoxPlaceholder))
             {
-                descriptionTextBox.BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString(colorsConfig.textBoxBorderErrorBackground));
+                descriptionTextBox.BorderBrush = colorsConfig.textBoxBorderErrorBackground;
                 canBeAdded = false;
             }
 
@@ -100,30 +103,27 @@ namespace Notebook
 
         private void RemoveButton_Click(object sender, RoutedEventArgs s)
         {
-            // Unique id is set to toDoStackPanel (parent of the button parent), so firstly we must get it
             Button removeButton = sender as Button;
-            StackPanel titleStackPanel = removeButton.Parent as StackPanel;
-            StackPanel toDoStackPanel = titleStackPanel.Parent as StackPanel;
-
-            int toDoUniqueId = (int)toDoStackPanel.Tag;
+            int toDoUniqueId = (int)removeButton.Tag;
             int elemIdToRemove = 0;
 
             if (toDoListStackPanel.Children.Count > 1)
             {          
-                // We go through all the elements in the ToDo list stack panel and find appropriate id to remove
                 foreach (StackPanel elemStackPanel in toDoListStackPanel.Children)
                 {
-                    int currentId = toDoListStackPanel.Children.IndexOf(elemStackPanel);
+                    int elemStackPanelUniqueId = (int)elemStackPanel.Tag;
 
-                    if (currentId == toDoUniqueId) elemIdToRemove = currentId;
+                    if (elemStackPanelUniqueId == toDoUniqueId) elemIdToRemove = toDoListStackPanel.Children.IndexOf(elemStackPanel);
                 }
             }
 
             toDoListStackPanel.Children.RemoveAt(elemIdToRemove);
         }
 
-        private void HandleToDoTools(StackPanel buttonsStackPanel)
-        {
+        // button have to be a button that is buttonStackPanel's child
+        private void HandleToDoTools(Button button)
+        {        
+            StackPanel buttonsStackPanel = button.Parent as StackPanel;
             StackPanel toDoStackPanel = buttonsStackPanel.Parent as StackPanel;
 
             Button editButton = buttonsStackPanel.Children[(int)ButtonsStackPanelOrder.EditButton] as Button;
@@ -139,22 +139,39 @@ namespace Notebook
 
             title.Focusable = (title.Focusable) ? false : true;
             description.Focusable = (description.Focusable) ? false : true;
-            title.BorderThickness = (title.BorderThickness.Top == 0) ? new Thickness(1) : new Thickness(0);
-            description.BorderThickness = (title.BorderThickness.Top == 0) ? new Thickness(1) : new Thickness(0);
+            title.BorderBrush = (title.BorderBrush == Brushes.Transparent) ? colorsConfig.textBoxBorderDefaultBackground : Brushes.Transparent;
+            description.BorderBrush = (description.BorderBrush == Brushes.Transparent) ? colorsConfig.textBoxBorderDefaultBackground : Brushes.Transparent;
         }
 
         private void EditButton_Click(object sender, RoutedEventArgs s)
         {
             Button editButton = sender as Button;
             StackPanel buttonsStackPanel = editButton.Parent as StackPanel;
+            StackPanel toDoStackPanel = buttonsStackPanel.Parent as StackPanel;
 
-            HandleToDoTools(buttonsStackPanel);          
+            titleState = (toDoStackPanel.Children[(int)ToDoStackPanelOrder.Title] as TextBox).Text;
+            descriptionState = (toDoStackPanel.Children[(int)ToDoStackPanelOrder.Description] as TextBox).Text;
+
+            HandleToDoTools(editButton);
         }
 
-        private void AddEditButtonTools(StackPanel buttonsStackPanel)
+        private void CancelButton_Click(object sender, RoutedEventArgs s)
         {
-            buttonsStackPanel.Children.Add(customButtons.getSaveButton());
-            buttonsStackPanel.Children.Add(customButtons.getCancelButton());
+            Button cancelButton = sender as Button;
+            StackPanel buttonsStackPanel = cancelButton.Parent as StackPanel;
+            StackPanel toDoStackPanel = buttonsStackPanel.Parent as StackPanel;
+
+            (toDoStackPanel.Children[(int)ToDoStackPanelOrder.Title] as TextBox).Text = titleState;
+            (toDoStackPanel.Children[(int)ToDoStackPanelOrder.Description] as TextBox).Text = descriptionState;
+
+            HandleToDoTools(cancelButton);
+        }
+
+        private void SaveButton_Click(object sender, RoutedEventArgs s)
+        {
+            Button cancelButton = sender as Button;
+
+            HandleToDoTools(cancelButton);
         }
 
         private void AddToDoToStackPanel(ToDo toDo)
@@ -170,39 +187,21 @@ namespace Notebook
                         - Save Button (will appear after edit button click)
                         - Cancel Button (will appear after edit button click)
             */
-            StackPanel toDoStackPanel = new StackPanel 
-            { 
-                Orientation = Orientation.Vertical,
-                Margin = new Thickness(10, 0, 0, 10)
-                
-            };
-            toDoStackPanel.Tag = toDoUniqueId++;
 
-            TextBox title = new TextBox
-            { 
-                Text = toDo.Title,
-                FontSize = 18,
-                Foreground = Brushes.Black,
-                Focusable = false,
-                BorderThickness = new Thickness(0)
-            };
-            TextBox description = new TextBox
-            {
-                Text = toDo.Description,
-                FontSize = 14,
-                Foreground = Brushes.Black,
-                Opacity = 0.7,
-                TextWrapping = TextWrapping.Wrap,
-                Focusable = false,
-                BorderThickness = new Thickness(0)
-            };
+            StackPanel toDoStackPanel = customElements.getToDoStackPanel();
+            toDoStackPanel.Tag = toDoUniqueId;
+
+            TextBox title = customElements.getTitleTextBox(toDo.Title);
+            TextBox description = customElements.getTitleTextBox(toDo.Description);
+            description.Opacity = 0.7;
+            description.FontSize = 14;
 
             StackPanel buttonsStackPanel = new StackPanel { Orientation = Orientation.Horizontal };
 
-            Button removeButton = customButtons.getRemoveButton();
-            Button editButton = customButtons.getEditButton();
-            Button saveButton = customButtons.getSaveButton();
-            Button cancelButton = customButtons.getCancelButton();
+            Button removeButton = customElements.getRemoveButton();
+            Button editButton = customElements.getEditButton();
+            Button saveButton = customElements.getSaveButton();
+            Button cancelButton = customElements.getCancelButton();
             saveButton.Visibility = Visibility.Collapsed;
             cancelButton.Visibility = Visibility.Collapsed;
 
@@ -217,8 +216,13 @@ namespace Notebook
 
             toDoListStackPanel.Children.Add(toDoStackPanel);
 
+            removeButton.Tag = toDoUniqueId;
             removeButton.Click += RemoveButton_Click;
             editButton.Click += EditButton_Click;
+            saveButton.Click += SaveButton_Click;
+            cancelButton.Click += CancelButton_Click;
+
+            toDoUniqueId++;
         }
     }
 }
