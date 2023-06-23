@@ -21,12 +21,21 @@ namespace Notebook
         private string descriptionTextBoxPlaceholder = "Enter description";
         private int uniqueId = 0;
 
+        private string textBoxBorderDefaultColor = "#ABADB3";
+        private string textBoxBorderErrorColor = "#EE4238";
+        private string removeButtonColor = "#ED5E68";
+        private string editButtonColor = "#3F8EBD";
+
         public MainWindow()
         {
             InitializeComponent();
 
             titleTextBox.Text = titleTextBoxPlaceholder;
+            titleTextBox.Tag = titleTextBoxPlaceholder;
             descriptionTextBox.Text = descriptionTextBoxPlaceholder;
+            descriptionTextBox.Tag = descriptionTextBoxPlaceholder;
+
+            titleTextBox.BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString(textBoxBorderDefaultColor));
         }
 
         private bool isTextBoxEmpty(TextBox textBox) => textBox.Text.Trim() == "";
@@ -36,29 +45,14 @@ namespace Notebook
         {
             TextBox currentTextBox = sender as TextBox;
 
-            if (currentTextBox == titleTextBox && isPlaceholder(currentTextBox, titleTextBoxPlaceholder))
-            {
-                currentTextBox.Text = "";
-            }
-            else if (currentTextBox == descriptionTextBox && isPlaceholder(currentTextBox, descriptionTextBoxPlaceholder))
-            {
-                currentTextBox.Text = "";
-            }
-
+            if (isPlaceholder(currentTextBox, (string)currentTextBox.Tag)) currentTextBox.Text = "";
         }
 
         private void TextBox_LostFocus(object sender, RoutedEventArgs e)
         {
             TextBox currentTextBox = sender as TextBox;
 
-            if (currentTextBox == titleTextBox && isTextBoxEmpty(currentTextBox))
-            {
-                currentTextBox.Text = titleTextBoxPlaceholder;
-            }
-            else if (currentTextBox == descriptionTextBox && isTextBoxEmpty(currentTextBox))
-            {
-                currentTextBox.Text = descriptionTextBoxPlaceholder;
-            }
+            if (isTextBoxEmpty(currentTextBox)) currentTextBox.Text = (string)currentTextBox.Tag; 
         }
 
         private void Window_MouseDown(object sender, MouseButtonEventArgs e)
@@ -72,13 +66,13 @@ namespace Notebook
 
             if (isTextBoxEmpty(titleTextBox) || isPlaceholder(titleTextBox, titleTextBoxPlaceholder))
             {
-                titleTextBox.BorderBrush = Brushes.Red;
+                titleTextBox.BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString(textBoxBorderErrorColor));
                 canBeAdded = false;
             }
 
             if (isTextBoxEmpty(descriptionTextBox) || isPlaceholder(descriptionTextBox, descriptionTextBoxPlaceholder))
             {
-                descriptionTextBox.BorderBrush = Brushes.Red;
+                descriptionTextBox.BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString(textBoxBorderErrorColor));
                 canBeAdded = false;
             }
 
@@ -143,7 +137,7 @@ namespace Notebook
             Button removeButton = new Button
             {
                 Content = "Remove",
-                Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#ED5E68")),
+                Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString(removeButtonColor)),
                 Foreground = Brushes.White,
                 Margin = baseButton.Margin,
                 Padding = baseButton.Padding,
@@ -154,7 +148,7 @@ namespace Notebook
             Button editButton = new Button 
             {
                 Content = "Edit",
-                Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#3F8EBD")),
+                Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString(editButtonColor)),
                 Foreground = Brushes.White,
                 Margin = baseButton.Margin,
                 Padding = baseButton.Padding,
