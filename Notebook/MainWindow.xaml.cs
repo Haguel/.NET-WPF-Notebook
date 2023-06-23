@@ -17,14 +17,28 @@ namespace Notebook
 {
     public partial class MainWindow : Window
     {
+        private int toDoUniqueId = 0;
+
         private string titleTextBoxPlaceholder = "Enter title";
         private string descriptionTextBoxPlaceholder = "Enter description";
-        private int uniqueId = 0;
 
-        private string textBoxBorderDefaultColor = "#ABADB3";
-        private string textBoxBorderErrorColor = "#EE4238";
-        private string removeButtonColor = "#ED5E68";
-        private string editButtonColor = "#3F8EBD";
+        ColorsConfig colorsConfig = new ColorsConfig();
+        CustomButtons customButtons = new CustomButtons();
+
+        private enum ButtonsStackPanelOrder
+        {
+            RemoveButton = 0,
+            EditButton,
+            SaveButton,
+            CancelButton
+        }
+
+        private enum ToDoStackPanelOrder
+        {
+            Title = 0,
+            Description,
+            ButtonsStackPanel,
+        }
 
         public MainWindow()
         {
@@ -35,7 +49,7 @@ namespace Notebook
             descriptionTextBox.Text = descriptionTextBoxPlaceholder;
             descriptionTextBox.Tag = descriptionTextBoxPlaceholder;
 
-            titleTextBox.BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString(textBoxBorderDefaultColor));
+            titleTextBox.BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString(colorsConfig.textBoxBorderDefaultBackground));
         }
 
         private bool isTextBoxEmpty(TextBox textBox) => textBox.Text.Trim() == "";
@@ -66,13 +80,13 @@ namespace Notebook
 
             if (isTextBoxEmpty(titleTextBox) || isPlaceholder(titleTextBox, titleTextBoxPlaceholder))
             {
-                titleTextBox.BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString(textBoxBorderErrorColor));
+                titleTextBox.BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString(colorsConfig.textBoxBorderErrorBackground));
                 canBeAdded = false;
             }
 
             if (isTextBoxEmpty(descriptionTextBox) || isPlaceholder(descriptionTextBox, descriptionTextBoxPlaceholder))
             {
-                descriptionTextBox.BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString(textBoxBorderErrorColor));
+                descriptionTextBox.BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString(colorsConfig.textBoxBorderErrorBackground));
                 canBeAdded = false;
             }
 
@@ -86,7 +100,7 @@ namespace Notebook
 
         private void RemoveButton_Click(object sender, RoutedEventArgs s)
         {
-            // Unique id is set to toDoStackPanel (parent of the button parent), so firstly we must get
+            // Unique id is set to toDoStackPanel (parent of the button parent), so firstly we must get it
             Button removeButton = sender as Button;
             StackPanel titleStackPanel = removeButton.Parent as StackPanel;
             StackPanel toDoStackPanel = titleStackPanel.Parent as StackPanel;
@@ -108,73 +122,103 @@ namespace Notebook
             toDoListStackPanel.Children.RemoveAt(elemIdToRemove);
         }
 
+        private void HandleToDoTools(StackPanel buttonsStackPanel)
+        {
+            StackPanel toDoStackPanel = buttonsStackPanel.Parent as StackPanel;
+
+            Button editButton = buttonsStackPanel.Children[(int)ButtonsStackPanelOrder.EditButton] as Button;
+            Button saveButton = buttonsStackPanel.Children[(int)ButtonsStackPanelOrder.SaveButton] as Button;
+            Button cancelButton = buttonsStackPanel.Children[(int)ButtonsStackPanelOrder.CancelButton] as Button;
+
+            editButton.Visibility = (editButton.Visibility == Visibility.Collapsed) ? Visibility.Visible : Visibility.Collapsed;
+            saveButton.Visibility = (saveButton.Visibility == Visibility.Collapsed) ? Visibility.Visible : Visibility.Collapsed;
+            cancelButton.Visibility = (cancelButton.Visibility == Visibility.Collapsed) ? Visibility.Visible : Visibility.Collapsed;
+
+            TextBox title = toDoStackPanel.Children[(int)ToDoStackPanelOrder.Title] as TextBox;
+            TextBox description = toDoStackPanel.Children[(int)ToDoStackPanelOrder.Description] as TextBox;
+
+            title.Focusable = (title.Focusable) ? false : true;
+            description.Focusable = (description.Focusable) ? false : true;
+            title.BorderThickness = (title.BorderThickness.Top == 0) ? new Thickness(1) : new Thickness(0);
+            description.BorderThickness = (title.BorderThickness.Top == 0) ? new Thickness(1) : new Thickness(0);
+        }
+
+        private void EditButton_Click(object sender, RoutedEventArgs s)
+        {
+            Button editButton = sender as Button;
+            StackPanel buttonsStackPanel = editButton.Parent as StackPanel;
+
+            HandleToDoTools(buttonsStackPanel);          
+        }
+
+        private void AddEditButtonTools(StackPanel buttonsStackPanel)
+        {
+            buttonsStackPanel.Children.Add(customButtons.getSaveButton());
+            buttonsStackPanel.Children.Add(customButtons.getCancelButton());
+        }
+
         private void AddToDoToStackPanel(ToDo toDo)
         {
+            /*
+                The structure of each toDo is that:
+                ToDoStackPanel: (look ToDoStackPanelOrder enum)
+                    - Title TextBox
+                    - Description TextBox
+                    - Buttons' StackPanel: (look ButtonsStackPanelOrder enum)
+                        - Remove Button
+                        - Edit Button
+                        - Save Button (will appear after edit button click)
+                        - Cancel Button (will appear after edit button click)
+            */
             StackPanel toDoStackPanel = new StackPanel 
             { 
                 Orientation = Orientation.Vertical,
                 Margin = new Thickness(10, 0, 0, 10)
                 
             };
-            toDoStackPanel.Tag = uniqueId++;
+            toDoStackPanel.Tag = toDoUniqueId++;
 
-            StackPanel titleStackPanel = new StackPanel { Orientation = Orientation.Horizontal };
-            TextBlock title = new TextBlock 
+            TextBox title = new TextBox
             { 
                 Text = toDo.Title,
                 FontSize = 18,
-                Foreground = Brushes.Black
+                Foreground = Brushes.Black,
+                Focusable = false,
+                BorderThickness = new Thickness(0)
             };
-
-            Button baseButton = new Button
-            {
-                Margin = new Thickness(10, 0, 0, 0),
-                Padding = new Thickness(5, 0, 5, 0),
-                BorderThickness = new Thickness(0),
-                Width = 100,
-                Height = 25,
-            };
-            Button removeButton = new Button
-            {
-                Content = "Remove",
-                Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString(removeButtonColor)),
-                Foreground = Brushes.White,
-                Margin = baseButton.Margin,
-                Padding = baseButton.Padding,
-                BorderThickness = baseButton.BorderThickness,
-                Width = baseButton.Width,
-                Height = baseButton.Height,
-            };
-            Button editButton = new Button 
-            {
-                Content = "Edit",
-                Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString(editButtonColor)),
-                Foreground = Brushes.White,
-                Margin = baseButton.Margin,
-                Padding = baseButton.Padding,
-                BorderThickness = baseButton.BorderThickness,
-                Width = baseButton.Width,
-                Height = baseButton.Height
-            };
-            titleStackPanel.Children.Add(title);
-            titleStackPanel.Children.Add(removeButton);
-            titleStackPanel.Children.Add(editButton);
-
-            TextBlock description = new TextBlock 
+            TextBox description = new TextBox
             {
                 Text = toDo.Description,
                 FontSize = 14,
                 Foreground = Brushes.Black,
                 Opacity = 0.7,
                 TextWrapping = TextWrapping.Wrap,
+                Focusable = false,
+                BorderThickness = new Thickness(0)
             };
 
-            toDoStackPanel.Children.Add(titleStackPanel);
+            StackPanel buttonsStackPanel = new StackPanel { Orientation = Orientation.Horizontal };
+
+            Button removeButton = customButtons.getRemoveButton();
+            Button editButton = customButtons.getEditButton();
+            Button saveButton = customButtons.getSaveButton();
+            Button cancelButton = customButtons.getCancelButton();
+            saveButton.Visibility = Visibility.Collapsed;
+            cancelButton.Visibility = Visibility.Collapsed;
+
+            buttonsStackPanel.Children.Add(removeButton);
+            buttonsStackPanel.Children.Add(editButton);
+            buttonsStackPanel.Children.Add(saveButton);
+            buttonsStackPanel.Children.Add(cancelButton);
+
+            toDoStackPanel.Children.Add(title);
             toDoStackPanel.Children.Add(description);
+            toDoStackPanel.Children.Add(buttonsStackPanel);
 
             toDoListStackPanel.Children.Add(toDoStackPanel);
 
             removeButton.Click += RemoveButton_Click;
+            editButton.Click += EditButton_Click;
         }
     }
 }
